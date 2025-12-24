@@ -97,7 +97,6 @@ sequenceDiagram
         Web-->>User: "Регистрация успешна"
     end
 ```
-![sd_1](img/sd_registartion.png)
 ### 2. Создание турнира организатором
 ```mermaid
 sequenceDiagram
@@ -144,7 +143,6 @@ sequenceDiagram
     GW-->>Admin: Успешно
     Admin-->>Org: Турнир создан
 ```
-![sd_2](img/sd_create_tournament.png)
 ### 3. Регистрация игрока на турнир
 ```mermaid
 sequenceDiagram
@@ -205,7 +203,6 @@ sequenceDiagram
         Web-->>Player: "Вы зарегистрированы"
     end
 ```
-![sd_3](img/sd_player_register_to_tournamnet.png)
 ### 4. Матчмейкинг и создание боя
 ```mermaid
 sequenceDiagram
@@ -248,71 +245,7 @@ sequenceDiagram
     Scheduler->>Tourn: updateTournamentBracket(tournament_id, battles)
     Tourn->>Event: emit TournamentRoundScheduledEvent
 ```
-![sd_4](img/sd_create_battle_scheduler.png)
-### 5. Исполнение боя в Battle Engine
-```mermaid
-sequenceDiagram
-    participant Engine as Battle Engine
-    participant Battle as Battle Service
-    participant Agent1 as Agent 1
-    participant Agent2 as Agent 2
-    participant Rating as Rating Service
-    participant Replay as Replay Service
-    participant Event as Event Store
-    participant Broker as Message Broker
-    participant Storage as Object Storage
-    participant DB_Battle as Battle DB
-
-    Note over Engine,DB_Battle: Этап 1: Инициализация
-    
-    Engine->>Storage: Загрузить код агента 1
-    Storage-->>Engine: Код агента 1
-    
-    Engine->>Storage: Загрузить код агента 2
-    Storage-->>Engine: Код агента 2
-    
-    Engine->>Engine: Инициализировать игровое поле
-    Engine->>Event: emit BattleStartedEvent
-    
-    Note over Engine,Engine: Этап 2: Игровой цикл
-    
-    loop Каждый игровой тик (1..N)
-        Engine->>Agent1: executeTurn(game_state)
-        Agent1-->>Engine: Действие агента 1
-        
-        Engine->>Agent2: executeTurn(game_state)
-        Agent2-->>Engine: Действие агента 2
-        
-        Engine->>Engine: Применить физику и правила
-        Engine->>Engine: Обновить игровое состояние
-        
-        alt Условие победы выполнено
-            Engine->>Engine: Определить победителя
-            break
-        end
-    end
-    
-    Note over Engine,Storage: Этап 3: Завершение
-    
-    Engine->>Engine: Сгенерировать реплей
-    Engine->>Storage: Сохранить реплей
-    Storage-->>Engine: replay_url
-    
-    Engine->>DB_Battle: Сохранить результаты
-    Engine->>Event: emit BattleCompletedEvent
-    Engine->>Broker: publish battle.completed
-    
-    Broker->>Battle: battle.completed
-    Battle->>Battle: Обновить статус боя
-    
-    Broker->>Rating: battle.completed
-    Rating->>Rating: Обновить рейтинги игроков
-    
-    Broker->>Replay: battle.completed
-    Replay->>Replay: Обработать реплей для CDN
-```
-![sd_5](img/battle_engine_scheduler.png)
-### 6. Обновление рейтинга после боя (Saga)
+### 5. Обновление рейтинга после боя (Saga)
 ```mermaid
 sequenceDiagram
     participant Broker as Message Broker
@@ -352,8 +285,7 @@ sequenceDiagram
     
     Rating->>Event: emit RatingProcessingCompletedEvent
 ```
-![sd_6](img/update_raiting_after_battler_saga.png)
-### 7. Просмотр реплея боя
+### 6. Просмотр реплея боя
 ```mermaid
 sequenceDiagram
     participant User as Пользователь
@@ -402,8 +334,7 @@ sequenceDiagram
     Web->>Web: Воспроизвести реплей
     Web-->>User: Показать реплей
 ```
-![sd_7](img/video_transalter.png)
-### 8. Полный турнирный цикл (Swiss система)
+### 7. Полный турнирный цикл (Swiss система)
 ```mermaid
 sequenceDiagram
     participant Scheduler as Tournament Scheduler
@@ -459,7 +390,6 @@ sequenceDiagram
     Tourn->>Event: emit TournamentCompletedEvent
     Tourn->>Broker: publish tournament.completed
 ```
-![sd_8](img/all_touranment_loop.png)
 ## Узкие места и проблемы масштабирования
 ### 1. Проблема: Нагрузка на Battle Engine
 **Описание:** Игровые симуляции требуют значительных вычислительных ресурсов, особенно при массовых турнирах.</br>
